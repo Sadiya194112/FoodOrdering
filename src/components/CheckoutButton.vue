@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <v-btn
     class="confirm"
     width="750"
@@ -12,11 +12,7 @@
 <script>
 
 export default {
-  props: {
-    text: {
-      type: String,
-    },
-  }
+
 }
 </script>
 
@@ -29,4 +25,4 @@ export default {
   text-decoration: none;
   color: white;
 }
-</style>
+</style> -->

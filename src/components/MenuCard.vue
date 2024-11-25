@@ -39,7 +39,7 @@
     </v-col>
 
 
-    <SelectedMenu :btn="'Confirm Order'" :text="'Confirm Order'"/>
+    <SelectedMenu :isCartEmpty="isCartEmpty" :btn="'Confirm Order'" :text="'Confirm Order'"/>
 
 
   </v-row>
@@ -69,6 +69,12 @@ export default{
     },
     cart(){
       return this.$store.getters['menuList/getCart'];
+    },
+    isCartEmpty(){
+      if(this.cart.length > 0){
+        return true
+      }
+      else return false
     },
     subTotal(){
       return this.cart.reduce((total, item) => total + item.totalPrice, 0);

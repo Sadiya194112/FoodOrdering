@@ -1,39 +1,33 @@
 <template>
-    <v-main>
-      <div class="outer">
-      <v-row class="table-grid">
-        <v-col :cols="7" class="mx-10">
-          <v-row class="d-flex">
-            <v-col
-              v-for="table in tableList"
-              :key="table"
-              :cols="3"
-            >
-              <v-card width="250" height="85" @click="reserveTable(table.id)">
-                <div class="cardSize color justify-center">
-                  {{ table.name }} #{{ table.id }}
-                  <div>
-                    <v-icon icon="mdi-table-furniture" size="20px"></v-icon>
-                  </div>
+  <v-main height="800">
+    <v-row class="table-grid ma-0">
+      <v-col :cols="7" class="ml-5">
+        <v-row class="d-flex">
+          <v-col
+            v-for="table in tableList"
+            :key="table"
+            :cols="3"
+          >
+            <v-card  width="250" height="85" class="color" @click="reserveTable(table.id)">
+              <div class="cardSize color justify-center">
+                {{ table.name }} #{{ table.id }}
+                <div>
+                  <v-icon icon="mdi-table-furniture" size="20px"></v-icon>
                 </div>
-              </v-card>
+              </div>
+            </v-card>
 
-            </v-col>
-          </v-row>
-        </v-col>
-
-
-        <div v-if="btn === 'Confirm Order'">
-          <SelectedMenu :text = "'Checkout'"/>
-        </div>
-        <div v-else>
-          <SelectedMenu :text = "'Order'"/>
-        </div>
-
-
+          </v-col>
         </v-row>
-      </div>
-    </v-main>
+      </v-col>
+
+
+      <SelectedMenu :isCartEmpty="isCartEmpty" :text = "'Checkout'"/>
+
+    </v-row>
+  </v-main>
+
+
 </template>
 
 <script>
@@ -42,6 +36,10 @@ import SelectedMenu from './SelectedMenu.vue';
 export default {
   components: {
     SelectedMenu,
+  },
+  data(){
+    return {
+    }
   },
   props: {
     btn: {
@@ -63,6 +61,12 @@ export default {
     cart(){
       return this.$store.getters['menuList/getCart'];
     },
+    isCartEmpty(){
+      if(this.cart.length > 0){
+        return true
+      }
+      else return false
+    },
     reservedOrders(){
       return this.$store.getters["menuList/getReservedOrders"];
     }
@@ -71,11 +75,17 @@ export default {
 </script>
 
 <style scoped>
-.outer {
-  margin: 10px;
-  height: 800px;
 
+.color{
+  background: rgb(15, 56, 61);
+  color: white;
+  border: 2px solid #077c85;
 }
+.color:hover{
+  background: #023a53;
+  color: white;
+}
+
 .cardSize{
   font-size: 15px;
   padding: 20px 30px;
@@ -84,17 +94,14 @@ export default {
   transition: transform 0.
 }
 
-.table-button:hover {
+/* .table-button:hover {
   transform: scale(1.05);
-}
+} */
 
 .v-layout {
   gap: 1rem;
 }
-.color{
-  background: rgb(37, 34, 34);
-  color: white;
-}
+
 .confirm{
   color: rgb(9, 53, 7)
 }

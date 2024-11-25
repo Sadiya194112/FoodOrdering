@@ -1,5 +1,5 @@
 <template>
-  <v-btn
+  <v-btn v-if="isEmpty === true"
     class="confirm"
     width="750"
     >
@@ -12,7 +12,12 @@
 <script>
 
 export default {
-
+  props: {
+    isEmpty: {
+      type: Boolean,
+      required: true,
+    }
+  }
 }
 </script>
 

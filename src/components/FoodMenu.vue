@@ -5,7 +5,7 @@
         v-for="(item) in findProductList" :key="item" :id=item.id
         :cols="4"
       >
-      <v-card width="300" @click="addToCart(item)">
+      <v-card width="300" @click="addProduct(item)" class="pointer">
         <div class="image">
           <v-img :src="item.image"></v-img>
         </div>
@@ -40,43 +40,35 @@
 
 
 <script>
-// import SelectedMenu from './SelectedMenu.vue';
 
 export default{
 
-  components: {
-    // SelectedMenu,
-  },
   data(){
     return {
       selectMenu: {
         id: 0,
         name: '',
-        price: 0,
         type: "",
         rating: 0,
         reviews: 0,
+        price: 0,
         totalPrice: 0,
+        quantity: 0,
         icon: "",
         image: '',
       }
     }
   },
-  methods: {
-    addToCart(item){
-      this.selectMenu = item;
-      this.$store.commit('menuList/addToCart', item);
-    },
-  },
-
   computed: {
     findProductList(){
       return this.$store.getters['menuList/getProductList'];
     },
-    cart(){
-      return this.$store.getters['menuList/getCart'];
+  },
+  methods: {
+    addProduct(item){
+      this.selectMenu = item;
+      this.$emit('selectProduct', this.selectMenu)
     },
-
   },
 }
 </script>
@@ -85,7 +77,9 @@ export default{
 
 
 <style scoped>
-
+.pointer{
+  cursor: pointer;
+}
 .image{
   width: 300px;
   height: 250px;

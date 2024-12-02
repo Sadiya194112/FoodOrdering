@@ -1,11 +1,62 @@
 <template>
-  <v-main height="800">
-    <v-row class="table-grid ma-0">
-      <v-col :cols="7" class="ml-5 d-flex justify-center align-center">
-        <div v-if="billPaid == false">
+  <v-main height="950">
+    <v-row class="table-grid ml-10">
+
+      <v-col :cols="4" class="mr-5">
+        <v-card-item class="bg-cyan-darken-4">
+          <v-card-title>
+            <span class="text-h5">Order Id</span> #{{ this.orderId }}
+          </v-card-title>
+        </v-card-item>
+
+      <v-list>
+        <v-list-item>
+          <div class="d-flex justify-space-between">
+            <div>
+              <v-table class="table">
+                <thead class="thead">
+                  <tr>
+                    <th class="text-center">ID</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-center">Price</th>
+                  </tr>
+                </thead>
+                <tbody class="tbody">
+                  <tr
+                    v-for="item in currOrder.menu" :key="item.id"
+                    class="trow-color"
+                    >
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.price }}</td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </div>
+
+
+        </div>
+        </v-list-item>
+
+        <v-divider inset></v-divider>
+          <div class="d-flex justify-space-between">VAT (5%)<span>{{ currOrder.vat }}</span></div>
+          <div class="d-flex justify-space-between">Service Charge (10%)<span>{{ currOrder.serviceCharge }}</span></div>
+          <div class="d-flex justify-space-between">Total Price <span>{{ currOrder.totalPrice }}</span></div>
+
+          <v-divider inset></v-divider>
+
+
+      </v-list>
+      </v-col>
+
+      <v-col :cols="7" class="ml-5 ">
+        <h1 class="table-header mb-5 text-center">Pay the Bill</h1>
+        <div v-if="billPaid == false" class="d-flex justify-center">
           <div class="d-flex align-center" style="width: 600px">
             <input
-              v-model.number="billAmount"
+              v-model="billAmount"
               class="input-box"
               type="text"
               style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
@@ -22,58 +73,13 @@
           </div>
         </div>
         <div v-else>
-          <v-icon><span class="material-symbols-outlined">BILL PAID</span></v-icon>
+          <div class="d-flex justify-center">
+            <v-icon class="green-block" icon="mdi mdi-currency-usd"><span color="black">BILL PAID</span></v-icon>
+          </div>
         </div>
       </v-col>
 
-      <v-col :cols="4">
-        <v-card-item class="bg-cyan-darken-4">
-            <v-card-title>
-              <span class="text-h5">Order Id</span> #{{ this.orderId }}
-            </v-card-title>
-        </v-card-item>
 
-        <v-list>
-          <v-list-item>
-            <div class="d-flex justify-space-between">
-              <div>
-                <v-table class="table">
-                  <thead class="thead">
-                    <tr>
-                      <th class="text-center">ID</th>
-                      <th class="text-center">Name</th>
-                      <th class="text-center">Quantity</th>
-                      <th class="text-center">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody class="tbody">
-                    <tr
-                      v-for="(item, index) in cart" :key="index"
-                      class="trow-color"
-                      >
-                      <td>{{ item.id }}</td>
-                      <td>{{ item.name }}</td>
-                      <td>{{ item.count }}</td>
-                      <td>{{  item.price  * item.count }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </div>
-
-
-          </div>
-          </v-list-item>
-
-          <v-divider inset></v-divider>
-            <div class="d-flex justify-space-between">VAT (5%)<span>{{ vat }}</span></div>
-            <div class="d-flex justify-space-between">Service Charge (10%)<span>{{ serviceCharge }}</span></div>
-            <div class="d-flex justify-space-between">Total Price <span>{{ totalPrice }}</span></div>
-
-            <v-divider inset></v-divider>
-
-
-          </v-list>
-        </v-col>
 
     </v-row>
   </v-main>
@@ -90,7 +96,8 @@ export default {
     return {
       disabled: true,
       executed: false,
-      orderData: {
+
+      currOrder: {
         orderId: 0,
         menu: null,
         vat: 0,
@@ -108,12 +115,12 @@ export default {
 
     for (let i = 0; i < orderList.length; i++) {
       if (orderList[i].orderId == this.orderId) {
-        this.orderData.orderId = this.orderId;
-        this.orderData.menu = orderList[i].menu;
-        this.orderData.vat = orderList[i].vat;
-        this.orderData.basicCharge = orderList[i].basicCharge;
-        this.orderData.serviceCharge = orderList[i].serviceCharge;
-        this.orderData.totalPrice = orderList[i].totalPrice;
+        this.currOrder.orderId = this.orderId;
+        this.currOrder.menu = orderList[i].menu;
+        this.currOrder.vat = orderList[i].vat;
+        this.currOrder.basicCharge = orderList[i].basicCharge;
+        this.currOrder.serviceCharge = orderList[i].serviceCharge;
+        this.currOrder.totalPrice = orderList[i].totalPrice;
       }
     }
   },
@@ -124,64 +131,31 @@ export default {
     tableList(){
       return this.$store.getters['menuList/getTableList'];
     },
-    cart(){
-      return this.$store.getters['menuList/getCart'];
-    },
-
-
-    subTotal(){
-      return this.cart.reduce((total, item) => total + item.totalPrice, 0);
-    },
-    vat(){
-      return (this.subTotal * 0.05);
-    },
-    serviceCharge(){
-      return (this.subTotal * 0.1);
-    },
-    totalExtraCharge(){
-      return this.vat + this.serviceCharge;
-    },
-    totalPrice(){
-      return this.subTotal + this.totalExtraCharge;
-    }
   },
   watch: {
-  billAmount() {
-    const enteredAmount = parseFloat(this.billAmount); // Convert to number
-    console.log("Entered Amount:", enteredAmount);
-    this.disabled = true; // Default state
-
-    for (let i = 0; i < this.orderList.length; i++) {
-      console.log("Checking Order:", this.orderList[i]);
-      if (this.orderList[i].orderId === this.orderId) {
-        console.log(
-          "Comparing:",
-          this.orderList[i].totalPrice,
-          "with",
-          enteredAmount
-        );
-        if (Math.abs(this.orderList[i].totalPrice - enteredAmount) < 0.01) {
-          this.disabled = false; // Enable button if matched
-          console.log("Match found, enabling button");
+    billAmount() {
+      for(let i=0; i < this.orderList.length; i++){
+        console.log(this.orderList[i].totalPrice);
+        console.log(this.billAmount);
+        if(this.orderList[i].totalPrice == this.billAmount){
+          this.disabled = false;
           break;
         }
+        else{
+          this.disabled = true;
+        }
       }
-    }
+    },
   },
-},
 
 
   methods: {
     payBill() {
       for (let i = 0; i < this.orderList.length; i++) {
-        if (this.orderList[i].orderId === this.orderId && this.orderList[i].totalPrice === parseFloat(this.billAmount)) {
-          const table = this.tableList.find(element => element.orderId === this.orderId);
-          if (table) {
-            table.select = false;
-          }
+        if (this.orderList[i].totalPrice == this.billAmount){
+          this.tableList.find(ele => ele.orderId == this.orderId).allocated = false;
           this.orderList[i].paidBill = true;
           this.billPaid = true;
-          break;
         }
       }
     },
@@ -190,10 +164,10 @@ export default {
         console.log(clickedOrderId);
         if (this.orderList[i].orderId == clickedOrderId) {
           this.orderList[i].tableNo = tableId;
-          this.orderData.menu = this.orderList[i].menu;
-          this.orderData.vat = this.orderList[i].vat;
-          this.orderData.serviceCharge = this.orderList[i].serviceCharge;
-          this.orderData.totalPrice = this.orderList[i].totalPrice;
+          this.currOrder.menu = this.orderList[i].menu;
+          this.currOrder.vat = this.orderList[i].vat;
+          this.currOrder.serviceCharge = this.orderList[i].serviceCharge;
+          this.currOrder.totalPrice = this.orderList[i].totalPrice;
         }
       }
     },
@@ -204,7 +178,7 @@ export default {
       if (this.executed == false) {
         for (let i = 0; i < this.tableList.length; i++) {
           if (this.tableList[i].id == tableId) {
-            this.tableList[i].select = true;
+            this.tableList[i].allocated = true;
             this.tableList[i].orderId = this.id;
             console.log(this.id);
             this.getOrderDetails(this.id, tableId);
@@ -219,5 +193,16 @@ export default {
 </script>
 
 <style>
+.table-header {
+  color: rgb(26, 24, 24);
+  border-style: solid;
+  border-width: 2px;
+}
 
+.green-block{
+  border-radius: 80px;
+  background: green;
+  color: white;
+  height: 10%;
+}
 </style>

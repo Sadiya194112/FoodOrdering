@@ -133,9 +133,7 @@ const menuList = {
       },
     ],
 
-    reservedOrders: [],
     selectedList: [],
-    cart: [],         //Selected Menu is stored here
     orderList: [],    //To store all orders(each order = orderId + menu)
 
   },
@@ -145,9 +143,7 @@ const menuList = {
     selectListLength: (state) => state.selectedList.length,
     getOrderList: (state) => state.orderList,
 
-    getCart: (state) => state.cart,
     getTableList: (state) => state.tableList,
-    getReservedOrders: (state) => state.reservedOrders,
   },
   mutations: {
     //Added all orders in OrderList
@@ -181,18 +177,6 @@ const menuList = {
 
     removeMenu(context, menu){
       context.commit('removeMenu', menu);
-    },
-
-    assignTable({commit, state}, {tableId}){
-      // const orderId = Date.now();
-      const table = state.tableList.find((table) => table.id === tableId);
-      if(table && !table.allocated){
-        commit("assignTable", tableId);
-        return `Order has reserved table ${tableId}.`;
-      }
-      else{
-        return "Table is already reserved.";
-      }
     },
   },
 };

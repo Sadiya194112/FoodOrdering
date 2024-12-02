@@ -1,6 +1,63 @@
 <template>
-  <v-main height="800">
+  <v-main height="950">
     <v-row class="table-grid ma-0">
+
+      <v-col :cols="4">
+        <v-card-item class="bg-cyan-darken-4">
+            <v-card-title>
+              <span class="text-h5">Order Id</span> #{{ this.id }}
+            </v-card-title>
+        </v-card-item>
+
+        <v-list>
+          <v-list-item>
+            <div class="d-flex justify-space-between">
+              <div>
+                <v-table class="table">
+                  <thead class="thead">
+                    <tr>
+                      <th class="text-center">ID</th>
+                      <th class="text-center">Name</th>
+                      <th class="text-center">Quantity</th>
+                      <th class="text-center">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody class="tbody">
+                    <tr
+                      v-for="(item, index) in currOrder.menu" :key="index" :id=item.id
+                      class="trow-color"
+                      >
+                      <td>{{ item.id }}</td>
+                      <td>{{ item.name }}</td>
+                      <td>
+                        <span class="px-2">{{ item.quantity }}</span>
+                      </td>
+                      <td>{{  item.price }}</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
+          </div>
+          </v-list-item>
+
+          <v-divider inset></v-divider>
+            <div class="d-flex justify-space-between">VAT (5%)<span>{{ currOrder.vat }}</span></div>
+            <div class="d-flex justify-space-between">Service Charge (10%)<span>{{ currOrder.serviceCharge }}</span></div>
+            <div class="d-flex justify-space-between">Total Price <span>{{ currOrder.totalPrice }}</span></div>
+
+            <v-divider inset></v-divider>
+
+            <div
+              class="confirm"
+              @click="checkOut()"
+              >
+                  Checkout
+            </div>
+
+          </v-list>
+        </v-col>
+
+
       <v-col :cols="7" class="ml-5">
         <h1 class="table-header mb-5 text-center">Select Table</h1>
 
@@ -13,9 +70,9 @@
           <div v-if="table.allocated == false">
             <v-btn
               size="x-large"
-              width="270"
+              width="280"
               height="100"
-              class="color"
+              class="btn-color"
               @click="selectTable(table.id)"
               >
                 {{ table.name }} #{{ table.id }}
@@ -43,79 +100,6 @@
         </v-row>
       </v-col>
 
-
-      <v-col :cols="4">
-        <v-card-item class="bg-cyan-darken-4">
-            <v-card-title>
-              <span class="text-h5">Order Id</span> #{{ this.id }}
-            </v-card-title>
-        </v-card-item>
-
-        <v-list>
-          <v-list-item>
-            <div class="d-flex justify-space-between">
-              <div>
-                <v-table class="table">
-                  <thead class="thead">
-                    <tr>
-                      <th class="text-center">ID</th>
-                      <th class="text-center">Name</th>
-                      <th class="text-center">Quantity</th>
-                      <th class="text-center">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody class="tbody">
-                    <tr
-                      v-for="(item, index) in cart" :key="index"
-                      class="trow-color"
-                      >
-                      <td>{{ item.id }}</td>
-                      <td>{{ item.name }}</td>
-                      <td>
-                        <div v-if="isCartEmpty === true">
-                          <v-btn icon size="30px" color="green" class="ml-10"><v-icon icon="mdi-plus" size="20px" @click="incrementItem(item.id)"></v-icon></v-btn>
-                            <span class="px-2">{{ item.count }}</span>
-                          <v-btn icon size="30px" color="red"><v-icon icon="mdi-minus" size="20px" @click="decrementItem(item.id)"></v-icon></v-btn>
-                        </div>
-                        <div v-else>
-                          <span class="px-2">{{ item.count }}</span>
-                        </div>
-                      </td>
-                      <td>{{  item.price  * item.count }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </div>
-
-
-          </div>
-          </v-list-item>
-
-          <v-divider inset></v-divider>
-          <div class="d-flex justify-space-between">Sub Total Price<span>{{ subTotal }}</span></div>
-            <div class="d-flex justify-space-between">VAT (5%)<span>{{ vat }}</span></div>
-            <div class="d-flex justify-space-between">Service Charge (10%)<span>{{ serviceCharge }}</span></div>
-            <div class="d-flex justify-space-between">Total Extra Charge <span>{{ totalExtraCharge }}</span></div>
-            <div class="d-flex justify-space-between">Total Price <span>{{ totalPrice }}</span></div>
-
-            <v-divider inset></v-divider>
-
-            <div>
-              <v-btn
-                class="confirm"
-                width="750"
-                @click="checkOut()"
-                >
-                  Checkout
-              </v-btn>
-
-            </div>
-
-          </v-list>
-        </v-col>
-
-
-
     </v-row>
   </v-main>
 
@@ -126,26 +110,41 @@
 
 export default {
 
-  props: ["id", "btn"],   //Received Order id
+  props: ["id"],   //Received Order id
 
   data(){
     return {
+      disabled: true,
       executed: false,
 
-
-      orderData: {  //For
+      currOrder: {  //To get currOrder data
         orderId: 0,
         menu: null,
+        vat: 0,
         tableNo: 0,
+        basicCharge: 0,
+        serviceCharge: 0,
+        totalPrice: 0,
         isTableSelected: Boolean,
       }
     }
   },
   //To update value of data property
   created(){
-    for(let i=0; i<this.orderList.length; i++){
-      if(this.orderList[i].orderId == this.id){
-        this.orderData.menu = this.orderList[i].menu;
+    const orderList = this.$store.getters['menuList/getOrderList'];
+    for(let i=0; i < orderList.length; i++){
+      if(orderList[i].orderId == this.id){
+        this.currOrder.menu = orderList[i].menu;
+        this.currOrder.vat = orderList[i].vat;
+        this.currOrder.serviceCharge = orderList[i].serviceCharge;
+
+
+        console.log(this.currOrder.menu);
+        console.log(this.currOrder.vat);
+        console.log(orderList[i]);
+
+
+        this.currOrder.totalPrice = orderList[i].totalPrice;
       }
     }
   },
@@ -157,34 +156,6 @@ export default {
     tableList(){
       return this.$store.getters['menuList/getTableList'];
     },
-    cart(){
-      return this.$store.getters['menuList/getCart'];
-    },
-
-    isCartEmpty(){
-      if(this.cart.length > 0){
-        return true
-      }
-      else return false
-    },
-
-    subTotal(){
-      return this.cart.reduce((total, item) => total + item.totalPrice, 0);
-    },
-    vat(){
-      return (this.subTotal * 0.05);
-    },
-    serviceCharge(){
-      return (this.subTotal * 0.1);
-    },
-    totalExtraCharge(){
-      return this.vat + this.serviceCharge;
-    },
-    totalPrice(){
-      return this.subTotal + this.totalExtraCharge;
-    }
-
-
   },
 
   methods: {
@@ -196,13 +167,19 @@ export default {
 
           console.log("Ei order er table no: ", this.orderList[i].tableNo);
 
-          this.orderData.menu = this.orderList[i].menu;
+          this.currOrder.menu = this.orderList[i].menu;
+          this.currOrder.vat = this.orderList[i].vat;
+          this.currOrder.serviceCharge = this.orderList[i].serviceCharge;
+
+          console.log(this.currOrder.serviceCharge);
+
+          this.currOrder.totalPrice = this.orderList[i].totalPrice;
         }
       }
     },
     checkOut(){
       if(this.isTableSelected == true){
-        this.$router.push("/showtables");
+        this.$router.push("/showtables/");
       }
     },
     selectTable(tableId){
@@ -221,10 +198,6 @@ export default {
       }
     },
 
-    findTableId(tableId){
-      return this.reservedOrders.some((table) => table.id === tableId);
-    },
-
   },
 
 };
@@ -238,8 +211,9 @@ export default {
   font-size: 20px;
 }
 
-.color{
+.btn-color{
   background: rgb(15, 56, 61);
+  font-size: 15px;
   color: white;
   border: 2px solid #077c85;
   cursor: pointer;
@@ -259,5 +233,7 @@ export default {
 .confirm{
   background: rgb(9, 53, 7);
   color: white;
+  height: 30px;
+  text-align: center;
 }
 </style>
